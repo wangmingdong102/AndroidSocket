@@ -1,0 +1,90 @@
+LOCAL_PATH:= $(call my-dir)
+include $(CLEAR_VARS)
+
+LOCAL_JAVA_LIBRARIES := telephony-common 
+LOCAL_SRC_FILES := \
+        $(call all-java-files-under, src)
+
+#dupeiyu.wt add for resource overlay 20171218 begin
+LOCAL_RESOURCE_DIR :=
+
+ifneq ($(strip $(WINGUI_SAFEMGR_OVERLAY)),)
+$(warning wingsafemgr overlay resource $(WINGUI_SAFEMGR_OVERLAY) !!!)
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res_overlay/$(WINGUI_SAFEMGR_OVERLAY)
+LOCAL_AAPT_FLAGS += --auto-add-overlay
+endif
+
+ifeq ($(strip $(WINGUI_SAFEMGR_OVERLAY)),CTA)
+$(warning wingsafemgr overlay AndroidManifest_$(WINGUI_SAFEMGR_OVERLAY).xml !!!)
+LOCAL_MANIFEST_FILE = manifest_overlay/CTA/AndroidManifest.xml
+endif
+
+ifeq ($(strip $(WINGUI_SAFEMGR_OVERLAY)),ASR)
+$(shell cp -r $(LOCAL_PATH)/licence/asr/C5E0828AACEF2D1E6A9983DA09D0A9E2/licence.conf $(LOCAL_PATH)/assets/licence.conf)
+endif
+
+LOCAL_RESOURCE_DIR += $(LOCAL_PATH)/res
+
+#dupeiyu.wt add for resource overlay 20171218 end
+
+LOCAL_PACKAGE_NAME := WingSafeMgr
+LOCAL_CERTIFICATE := platform
+LOCAL_PRIVILEGED_MODULE := true
+
+LOCAL_PROGUARD_ENABLED := disabled
+#LOCAL_PROGUARD_FLAG_FILES := proguard.flags
+
+$(shell cp -r $(LOCAL_PATH)/assets/speed_white_app_list.xml $(TARGET_OUT_ETC)/speed_white_app_list.xml)
+$(shell cp -r $(LOCAL_PATH)/assets/speed_white_task_app_list.xml $(TARGET_OUT_ETC)/speed_white_task_app_list.xml)
+$(shell cp -r $(LOCAL_PATH)/assets/auto_start_white_app_list.xml $(TARGET_OUT_ETC)/auto_start_white_app_list.xml)
+
+LOCAL_STATIC_JAVA_LIBRARIES := pinyin4j \
+                                    cooTekService_local \
+                                    android-support-v4 \
+                                    android-support-v13 \
+                                    dom4j-1.6.1 \
+                                    junit-4.10 \
+                                    tms \
+                                    FlowSaleSDK \
+                                    safemgr-core \
+                                    StrangeCallsSdk \
+                                    iflytek_telephony_sdk
+
+# Bug 292083 wangmingdong.wt mod wingsafemgr add cmcc traffic correction 20171031
+LOCAL_PREBUILT_JNI_LIBS := libs/arm64-v8a/libams-1.2.8-mfr.so \
+                           libs/arm64-v8a/libbuffalo-1.0.0-mfr.so \
+                           libs/arm64-v8a/libbumblebee-1.0.4-mfr.so \
+                           libs/arm64-v8a/libdce-1.1.17-mfr.so \
+                           libs/arm64-v8a/liboptimus-1.0.0-mfr.so \
+                           libs/arm64-v8a/libQQImageCompare-1.5-mfr.so \
+                           libs/arm64-v8a/libTmsdk-2.0.10-mfr.so \
+                           libs/arm64-v8a/libsmartdialer_oem_module_x64.so
+
+# + req 281581 dupeiyu.wt add for versionName
+aa = 1
+bb = 3
+cccc = 3
+version_name := $(aa).$(bb).$(cccc).$(shell date +%y%m%d)
+LOCAL_AAPT_FLAGS += --version-name $(version_name)
+
+# - req 281581 dupeiyu.wt add for versionName
+
+include $(BUILD_PACKAGE)
+
+include $(CLEAR_VARS)
+
+# + req 281581 dupeiyu.wt modify for defined in wtContact.mk begin
+                                
+LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES := pinyin4j:libs/pinyin4j.jar \
+                                            dom4j-1.6.1:libs/dom4j-1.6.1.jar \
+                                            junit-4.10:libs/junit-4.10.jar \
+                                            tms:libs/tms.jar \
+                                            FlowSaleSDK:libs/FlowSaleSDK-3.0.1016-release.jar \
+                                            StrangeCallsSdk:libs/StrangeCallsSdk.jar \
+                                            iflytek_telephony_sdk:libs/iflytek_telephony_sdk.jar \
+                                            cooTekService_local:libs/CooTekPhoneService.jar
+
+# - req 281581 dupeiyu.wt modify for defined in wtContact.mk end                                                                                        
+                                            
+LOCAL_MODULE_TAGS := optional
+include $(BUILD_MULTI_PREBUILT)
