@@ -189,6 +189,14 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		
 		});
+
+		View serverInfo = findViewById(R.id.server_info);
+		serverInfo.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				showDialog();
+			}
+		});
 	}
 	
 	private String[] msgArray = new String[] { "Rose,Rose,Where are you",

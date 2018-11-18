@@ -179,6 +179,23 @@ public class MainActivity extends Activity implements OnClickListener {
 			}
 
 		});
+
+
+		View connection = findViewById(R.id.connection);
+		connection.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				connectServer();
+			}
+		});
+		View serverInfo = findViewById(R.id.server_info);
+		serverInfo.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+				MainActivity.this.startActivity(intent);
+			}
+		});
 	}
 
 	private String[] msgArray = new String[] { "Rose,Rose,Where are you",
