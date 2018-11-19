@@ -84,7 +84,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private long startVoiceT = -1, endVoiceT = -1;
 
 	private WifiMgr mWifiMgr;
-	private ArrayList<String> mWifiStatus = new ArrayList<String>();
+	private String[] mWifiStatus = new String[3];
 
 	private Handler mHandler = new Handler(){
 		
@@ -105,9 +105,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		getWindow().setSoftInputMode(
 				WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-		mWifiStatus.add(0, "wifi disalbed");
-		mWifiStatus.add(1, "wifi no scanned");
-		mWifiStatus.add(2, "wifi disconnected");
+		mWifiStatus[0] = "wifi disalbed";
+        mWifiStatus[1] = "wifi no scanned";
+        mWifiStatus[2] = "wifi disconnected";
 		mWifiMgr = new WifiMgr(this);
 
 		initView();
@@ -287,23 +287,23 @@ public class MainActivity extends Activity implements OnClickListener {
 			if (intent.getAction() == WifiManager.WIFI_STATE_CHANGED_ACTION) {
 				switch (intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WIFI_STATE_UNKNOWN)) {
 					case WIFI_STATE_DISABLED: {
-						mWifiStatus.add(0, "wifi disabled");
+						mWifiStatus[0] = "wifi disabled";
 						break;
 					}
 					case WIFI_STATE_DISABLING: {
-						mWifiStatus.add(0, "wifi disabling");
+                        mWifiStatus[0] = "wifi disabling";
 						break;
 					}
 					case WIFI_STATE_ENABLED: {
-						mWifiStatus.add(0, "wifi enabled");
+                        mWifiStatus[0] = "wifi enabled";
 						break;
 					}
 					case WIFI_STATE_ENABLING: {
-						mWifiStatus.add(0, "wifi enabling");
+                        mWifiStatus[0] = "wifi enabling";
 						break;
 					}
 					case WIFI_STATE_UNKNOWN: {
-						mWifiStatus.add(0, "wifi unknown");
+                        mWifiStatus[0] = "wifi unknown";
 						break;
 					}
 				}
@@ -311,9 +311,9 @@ public class MainActivity extends Activity implements OnClickListener {
 				WifiMgr wifiMgr = new WifiMgr(context);
 				List<ScanResult> scanResults = wifiMgr.getScanResults();
 				if (wifiMgr.isWifiEnabled() && scanResults != null && scanResults.size() > 0) { //成功扫描
-					mWifiStatus.add(1, "wifi scan ok");
+                    mWifiStatus[1] = " scan ok";
 				}else{
-					mWifiStatus.add(1, "wifi scan failed");
+                    mWifiStatus[1] = " scan failed";
 				}
 			} else if (intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) { //网络状态改变的广播
 				NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
@@ -321,13 +321,13 @@ public class MainActivity extends Activity implements OnClickListener {
 					if (info.getState().equals(NetworkInfo.State.CONNECTED)) { //WiFi已连接
 						WifiMgr wifiMgr = new WifiMgr(context);
 						String connectedSSID = wifiMgr.getConnectedSSID();
-						mWifiStatus.add(2, "wifi connected: "+connectedSSID);
+                        mWifiStatus[2] = " connected: "+connectedSSID;
 					} else if (info.getState().equals(NetworkInfo.State.DISCONNECTED)) { //WiFi已断开连接
-						mWifiStatus.add(2, "wifi disconnected");
+                        mWifiStatus[2] = " disconnected";
 					}
 				}
 			}
-			mWifiBtn.setText(mWifiStatus.get(0) + "|" + mWifiStatus.get(1)+ "|" + mWifiStatus.get(2));
+			mWifiBtn.setText(mWifiStatus[0] + "|" + mWifiStatus[1]+ "|" + mWifiStatus[2]);
 		}
 	};
 
