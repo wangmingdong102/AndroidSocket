@@ -7,7 +7,14 @@ import java.util.List;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
+import android.net.NetworkInfo;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -41,10 +48,17 @@ import com.jimmy.im.server.socket.MsgParam;
 import com.jimmy.im.server.socket.MsgRequest;
 import com.jimmy.im.server.socket.RequestQueueManager;
 import com.jimmy.im.server.socket.SocketServerManager;
+import com.jimmy.im.server.util.ApMgr;
 import com.jimmy.im.server.util.CommonUtil;
+import com.jimmy.im.server.util.WifiMgr;
 
 import de.greenrobot.event.EventBus;
 
+import static android.net.wifi.WifiManager.WIFI_STATE_DISABLING;
+import static android.net.wifi.WifiManager.WIFI_STATE_DISABLED;
+import static android.net.wifi.WifiManager.WIFI_STATE_ENABLING;
+import static android.net.wifi.WifiManager.WIFI_STATE_ENABLED;
+import static android.net.wifi.WifiManager.WIFI_STATE_UNKNOWN;
 /**
  * @author keshuangjie
  * @date 2014-12-1 下午7:42:59
@@ -57,6 +71,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	private Button mBtnSend;
 	private Button mBtnRcd;
+	private Button mWifiBtn;
+	private Button mWifiAPBtn;
 	private EditText mEditTextContent;
 	private RelativeLayout mBottom;
 	private ListView mListView;
@@ -66,7 +82,10 @@ public class MainActivity extends Activity implements OnClickListener {
 	private boolean btn_vocie = false;
 	private String voiceName;
 	private long startVoiceT = -1, endVoiceT = -1;
-	
+
+	private WifiMgr mWifiMgr;
+	private ArrayList<String> mWifiStatus = new ArrayList<String>();
+
 	private Handler mHandler = new Handler(){
 		
 		public void handleMessage(android.os.Message msg) {
@@ -85,14 +104,27 @@ public class MainActivity extends Activity implements OnClickListener {
 		setContentView(R.layout.main);
 		getWindow().setSoftInputMode(
 				WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
+		mWifiStatus.add(0, "wifi disalbed");
+		mWifiStatus.add(1, "wifi no scanned");
+		mWifiStatus.add(2, "wifi disconnected");
+		mWifiMgr = new WifiMgr(this);
+
 		initView();
 
 		initData();
 		
 		SocketServerManager.getInstance().startConnect();
-		
+
+		registerBroadcast();
 	}
-	
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		unregisterReceiver(mBroadcastReceiver);
+	}
+
 	public void initView() {
 		mListView = (ListView) findViewById(R.id.listview);
 		mBtnSend = (Button) findViewById(R.id.btn_send);
@@ -197,8 +229,108 @@ public class MainActivity extends Activity implements OnClickListener {
 				showDialog();
 			}
 		});
+
+		Button wifiSwitch = (Button)findViewById(R.id.wifi_switch);
+		mWifiBtn = wifiSwitch;
+		boolean isWifiEnabled = mWifiMgr.isWifiEnabled();
+		if(isWifiEnabled){
+			wifiSwitch.setText("WIFI is enabled");
+		}else{
+			wifiSwitch.setText("WIFI is disalbed");
+		}
+		wifiSwitch.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				boolean isWifiEnabled = mWifiMgr.isWifiEnabled();
+				if(isWifiEnabled) {
+					mWifiMgr.closeWifi();
+				}else{
+					mWifiMgr.openWifi();
+				}
+			}
+		});
+
+		Button wifiAPSwitch = (Button)findViewById(R.id.wifiap_switch);
+		mWifiAPBtn = wifiAPSwitch;
+		boolean isWifiAPOpened = ApMgr.isApOn(this);
+		if(isWifiAPOpened){
+			wifiAPSwitch.setText("WIFI AP is opened");
+		}else{
+			wifiAPSwitch.setText("WIFI AP is closed");
+		}
+		wifiAPSwitch.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				boolean isWifiAPOpened = ApMgr.isApOn(MainActivity.this);
+				if(isWifiAPOpened){
+					ApMgr.closeAp(MainActivity.this);
+				}else{
+					ApMgr.openAp(MainActivity.this, "spoamss2018", "20182018");
+				}
+			}
+		});
 	}
-	
+
+
+	private void registerBroadcast ()
+	{
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+		filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);//监听扫描周围可用WiFi列表结果
+		filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);//监听WiFi连接与断开
+		registerReceiver(mBroadcastReceiver, filter);
+	}
+
+	private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction() == WifiManager.WIFI_STATE_CHANGED_ACTION) {
+				switch (intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WIFI_STATE_UNKNOWN)) {
+					case WIFI_STATE_DISABLED: {
+						mWifiStatus.add(0, "wifi disabled");
+						break;
+					}
+					case WIFI_STATE_DISABLING: {
+						mWifiStatus.add(0, "wifi disabling");
+						break;
+					}
+					case WIFI_STATE_ENABLED: {
+						mWifiStatus.add(0, "wifi enabled");
+						break;
+					}
+					case WIFI_STATE_ENABLING: {
+						mWifiStatus.add(0, "wifi enabling");
+						break;
+					}
+					case WIFI_STATE_UNKNOWN: {
+						mWifiStatus.add(0, "wifi unknown");
+						break;
+					}
+				}
+			} else if (intent.getAction().equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+				WifiMgr wifiMgr = new WifiMgr(context);
+				List<ScanResult> scanResults = wifiMgr.getScanResults();
+				if (wifiMgr.isWifiEnabled() && scanResults != null && scanResults.size() > 0) { //成功扫描
+					mWifiStatus.add(1, "wifi scan ok");
+				}else{
+					mWifiStatus.add(1, "wifi scan failed");
+				}
+			} else if (intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) { //网络状态改变的广播
+				NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+				if (info != null) {
+					if (info.getState().equals(NetworkInfo.State.CONNECTED)) { //WiFi已连接
+						WifiMgr wifiMgr = new WifiMgr(context);
+						String connectedSSID = wifiMgr.getConnectedSSID();
+						mWifiStatus.add(2, "wifi connected: "+connectedSSID);
+					} else if (info.getState().equals(NetworkInfo.State.DISCONNECTED)) { //WiFi已断开连接
+						mWifiStatus.add(2, "wifi disconnected");
+					}
+				}
+			}
+			mWifiBtn.setText(mWifiStatus.get(0) + "|" + mWifiStatus.get(1)+ "|" + mWifiStatus.get(2));
+		}
+	};
+
 	private String[] msgArray = new String[] { "Rose,Rose,Where are you",
 			"Jack,I am here,please", "I am coming ", "Jack, I miss you ",
 			"I miss you too", "we will always together" };

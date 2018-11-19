@@ -21,12 +21,32 @@
 
     </RelativeLayout>
 
+    <LinearLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true">
+        <Button
+            android:id="@+id/wifi_switch"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/chat_send_btn"
+            android:text="wifi" />
+        <Button
+            android:id="@+id/wifiap_switch"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/chat_send_btn"
+            android:text="wifiap" />
+
+    </LinearLayout>
     <!-- 底部按钮以及 编辑框-->
     <RelativeLayout
         android:id="@+id/rl_bottom"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/bottom_bar"
         android:background="@drawable/chat_footer_bg" >
 
         <ImageView
