@@ -1,6 +1,7 @@
 <resources>
 
     <string name="app_name">IMServer</string>
+    <string name="wifiap_label">WIFI AP</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
 

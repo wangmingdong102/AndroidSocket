@@ -1,6 +1,10 @@
-https://blog.csdn.net/su749520/article/details/80485071
+
+Android WiFi热点完全研究(自定义创建、跳转系统界面设置、读取配置、切换，Android6.0适配)
+https://www.cnblogs.com/fly263/p/7341768.html
 
 Android 8.0 WiFi Ap 热点控制接口
+https://blog.csdn.net/su749520/article/details/80485071
+
 2018年05月28日 17:16:00 法迪 阅读数：1642
 版权声明：本文为博主原创文章，未经博主允许不得转载。 https://blog.csdn.net/su749520/article/details/80485071
 1. Android 7.0 及其以前的 WiFi 热点接口

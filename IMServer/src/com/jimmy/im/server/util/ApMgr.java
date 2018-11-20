@@ -1,17 +1,25 @@
 package com.jimmy.im.server.util;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.Environment;
 import android.text.TextUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Properties;
 
 /**
  * Created by AA on 2017/3/22.
  */
 public class ApMgr {
+    private static final String TAG = ApMgr.class.getSimpleName();
 
     /**
      * 便携热点是否开启
@@ -123,10 +131,33 @@ public class ApMgr {
         config.status = WifiConfiguration.Status.ENABLED;
         config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
         config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-        config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+
+        int indexOfWPA2_PSK = 4;
+        //从WifiConfiguration.KeyMgmt数组中查找WPA2_PSK的值
+        for (int i = 0; i < WifiConfiguration.KeyMgmt.strings.length; i++) {
+            if (WifiConfiguration.KeyMgmt.strings[i].equals("WPA2_PSK")) {
+                indexOfWPA2_PSK = i;
+                break;
+            }
+        }
+        Log.d(TAG, "getApConfig indexOfWPA2_PSK:"+indexOfWPA2_PSK);
+        Log.d(TAG, "getApConfig WifiConfiguration.KeyMgmt.WPA_PSK:"+WifiConfiguration.KeyMgmt.WPA_PSK);
+        config.allowedKeyManagement.set(indexOfWPA2_PSK);
+
         config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
         config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
         config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
         return config;
+    }
+
+    public static void openAPUI(Context context) {
+        Intent intent = new Intent();
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //打开网络共享与热点设置页面
+        ComponentName comp = new ComponentName(
+                "com.android.settings",
+                "com.android.settings.Settings$TetherSettingsActivity");
+        intent.setComponent(comp);
+        context.startActivity(intent);
     }
 }
