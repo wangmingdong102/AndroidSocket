@@ -12,15 +12,17 @@ LOCAL_CERTIFICATE := platform
 LOCAL_MODULE_TAGS := tests
 LOCAL_PROGUARD_ENABLED := disabled
 LOCAL_STATIC_JAVA_LIBRARIES := EventBus \
-                                    android-support-v4
-LOCAL_JAVA_LIBRARIES += org.apache.http.legacy
+    android-support-v4 \
+    apachehttp
+#LOCAL_JAVA_LIBRARIES += org.apache.http.legacy
 LOCAL_SDK_VERSION := current
 include $(BUILD_PACKAGE)
 
 
 
 include $(CLEAR_VARS)
-LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES := EventBus:libs/EventBus.jar
+LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES := EventBus:libs/EventBus.jar \
+    apachehttp:libs/org.apache.http.legacy.jar
 LOCAL_MODULE_TAGS := optional
 include $(BUILD_MULTI_PREBUILT)
 

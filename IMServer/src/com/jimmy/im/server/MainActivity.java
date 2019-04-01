@@ -285,30 +285,30 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	private boolean isHasPermissions() {
 		boolean result = false;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			if (!Settings.System.canWrite(this)) {
-				Toast.makeText(this, "打开热点需要启用“修改系统设置”权限，请手动开启", Toast.LENGTH_SHORT).show();
-
-				//清单文件中需要android.permission.WRITE_SETTINGS，否则打开的设置页面开关是灰色的
-				Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-				intent.setData(Uri.parse("package:" + this.getPackageName()));
-				//判断系统能否处理，部分ROM无此action，如魅族Flyme
-				if (intent.resolveActivity(getPackageManager()) != null) {
-					startActivity(intent);
-				} else {
-					//打开应用详情页
-					intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-					intent.setData(Uri.parse("package:" + this.getPackageName()));
-					if (intent.resolveActivity(getPackageManager()) != null) {
-						startActivity(intent);
-					}
-				}
-			} else {
-				result = true;
-			}
-		} else {
+//		if (Build.VERSION.SDK_INT >= 23/*Build.VERSION_CODES.M*/) {
+//			if (!Settings.System.canWrite(this)) {
+//				Toast.makeText(this, "打开热点需要启用“修改系统设置”权限，请手动开启", Toast.LENGTH_SHORT).show();
+//
+//				//清单文件中需要android.permission.WRITE_SETTINGS，否则打开的设置页面开关是灰色的
+//				Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+//				intent.setData(Uri.parse("package:" + this.getPackageName()));
+//				//判断系统能否处理，部分ROM无此action，如魅族Flyme
+//				if (intent.resolveActivity(getPackageManager()) != null) {
+//					startActivity(intent);
+//				} else {
+//					//打开应用详情页
+//					intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+//					intent.setData(Uri.parse("package:" + this.getPackageName()));
+//					if (intent.resolveActivity(getPackageManager()) != null) {
+//						startActivity(intent);
+//					}
+//				}
+//			} else {
+//				result = true;
+//			}
+//		} else {
 			result = true;
-		}
+//		}
 		return result;
 	}
 
